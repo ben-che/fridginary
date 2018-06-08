@@ -7,14 +7,18 @@ const secret = require('./secrets.js').apiKey
 const recipeSearchUrl = `http://food2fork.com/api/search?key=${secret}&q=`
 //
 
+// Main get route --> returns JSON object of recipe search results
 app.get('/findRecipe', (req, res) => {
     console.log(req.query.items.split(',').join('&'))
     axios.get(recipeSearchUrl+(req.query.items.split(',').join('&')))
     .then(response => {
         console.log(response.data);
-        res.status(200).send('a-okay, ben')
+        res.json(response.data);
     })
-
+    .catch(error => {
+        console.log(error);
+        res.send(error)
+    })
 })
 
 app.listen(process.env.PORT || 8080, () => {

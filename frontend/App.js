@@ -1,16 +1,29 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, FlatList } from 'react-native';
 import { FormLabel, FormInput, FormValidationMessage, Button } from 'react-native-elements';
+import { createStackNavigator } from 'react-navigation';
 const axios = require('axios');
 const internalIp = require('./secrets.js').ip;
 
-export default class App extends React.Component {
+
+class HomeScreen extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       text: ''
     }
   }
+
+  static navigationOptions = {
+    title: 'Refriginary',
+    headerStyle: {
+      backgroundColor: '#f4511e',
+    },
+    headerTintColor: '#fff',
+    headerTitleStyle: {
+      fontWeight: 'bold',
+    },
+  };
 
   handleSubmit = () => {
     let formatText = String(this.state.text).split(" ").join('');
@@ -22,7 +35,11 @@ export default class App extends React.Component {
       this.setState(
         response.data
       )
-    }, setTimeout(()=>{console.log(this.state)},2000) )
+    })
+    .then(response => {
+      // Nav to results, pass entire state
+      this.props.navigation.navigate('Results', this.state)
+    })
     .catch(error => {
       console.log(error)
     })
@@ -50,6 +67,43 @@ export default class App extends React.Component {
             borderRadius: 5
             }} 
           />
+          <Button
+          title="Go to Results"
+          onPress={() => this.props.navigation.navigate('Results')}
+        />
+      </View>
+    );
+  }
+}
+
+class ResultsScreen extends React.Component {
+  static navigationOptions = {
+    title: "Search Results",
+  };
+
+  componentDidMount = () => {
+    console.log('ResultsScreen mounted!')
+    // console.log(this.props);
+    console.log(this.props.navigation.state.params) // state as prop is found here
+  }
+  render() {
+
+
+    return (
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+        {/* <Button
+          title="Go to Details"
+          onPress={() => this.props.navigation.navigate('Home')}
+        /> */}
+        <FlatList
+          data={this.props.navigation.state.params.recipes}
+          renderItem={({item}) => 
+          <View key={item.recipe_id}>
+            <Text>Recipe #{item.recipe_id}: {item.title}</Text>
+            <Text>Popularity:{item.social_rank}</Text>
+          </View>
+          }
+        />
       </View>
     );
   }
@@ -69,3 +123,17 @@ const styles = StyleSheet.create({
     color: 'red'
   }
 });
+
+const RootStack = createStackNavigator({
+    Home:HomeScreen,
+    Results: ResultsScreen
+  },
+  {
+    initialRouteName: 'Home',
+});
+
+export default class App extends React.Component {
+  render() {
+    return <RootStack />;
+  }
+}

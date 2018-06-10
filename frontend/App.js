@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, TextInput } from 'react-native';
 import { FormLabel, FormInput, FormValidationMessage, Button } from 'react-native-elements';
 const axios = require('axios')
 
@@ -7,19 +7,13 @@ export default class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      inputText: ''
+      text: ''
     }
   }
 
-  handleInput = (text) => {
-    console.log('Text field currently: ', text)
-    this.setState = ({
-      inputText : text
-    })
-  }
-
   handleSubmit = () => {
-    let formatText = this.state.inputText.replace(/\s+/g, '');
+    console.log(this.state.text)
+    let formatText = this.state.text.replace(/\s+/g, '');
     console.log(formatText);
     // axios.get(`http://localhost:8080//findRecipe?items=${this.state.inputText}`)
   }
@@ -30,9 +24,10 @@ export default class App extends React.Component {
         <Text>List all your leftover ingredients here!</Text>
         <Text>ex: chicken,bread,juice,jellybeans</Text>
         <FormLabel>Seach</FormLabel>
-        <FormInput onChangeText={(text) => this.handleInput(text)}/>
+        <TextInput value={this.state.text} onChangeText={(text) => this.setState({text})}/>
         <Text style={styles.mainText}>Shake your phone to open the developer menu.</Text>
         <Button 
+          onPress = {() => {this.handleSubmit()}}
           title="Find Recipes" 
           icon={{name:'search'}} 
           raised   

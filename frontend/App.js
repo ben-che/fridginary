@@ -1,7 +1,8 @@
 import React from 'react';
-import { StyleSheet, Text, View, TextInput } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { FormLabel, FormInput, FormValidationMessage, Button } from 'react-native-elements';
-const axios = require('axios')
+const axios = require('axios');
+const internalIp = require('./secrets.js').ip;
 
 export default class App extends React.Component {
   constructor(props) {
@@ -12,10 +13,17 @@ export default class App extends React.Component {
   }
 
   handleSubmit = () => {
-    console.log(this.state.text)
+    console.log('submit clicked')
     let formatText = this.state.text.replace(/\s+/g, '');
-    console.log(formatText);
-    // axios.get(`http://localhost:8080//findRecipe?items=${this.state.inputText}`)
+    // with android emulators: change localhost to http://10.0.2.2:8080
+    // with a real device, use ip address of the device the express server is hosted on
+    axios.get(`http://${internalIp}:8080/findRecipe?items=${this.state.inputText}`)
+    .then(response => {
+      console.log(response)
+    })
+    .catch(error => {
+      console.log(error)
+    })
   }
 
   render() {
@@ -24,7 +32,7 @@ export default class App extends React.Component {
         <Text>List all your leftover ingredients here!</Text>
         <Text>ex: chicken,bread,juice,jellybeans</Text>
         <FormLabel>Seach</FormLabel>
-        <TextInput value={this.state.text} onChangeText={(text) => this.setState({text})}/>
+        <FormInput value={this.state.text} onChangeText={(text) => this.setState({text})}/>
         <Text style={styles.mainText}>Shake your phone to open the developer menu.</Text>
         <Button 
           onPress = {() => {this.handleSubmit()}}

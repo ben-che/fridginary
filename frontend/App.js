@@ -13,14 +13,16 @@ export default class App extends React.Component {
   }
 
   handleSubmit = () => {
-    console.log('submit clicked')
-    let formatText = this.state.text.replace(/\s+/g, '');
+    let formatText = String(this.state.text).split(" ").join('');
     // with android emulators: change localhost to http://10.0.2.2:8080
     // with a real device, use ip address of the device the express server is hosted on
-    axios.get(`http://${internalIp}:8080/findRecipe?items=${this.state.inputText}`)
+    axios.get(`http://${internalIp}:8080/findRecipe?items=${formatText}`)
     .then(response => {
       console.log(response)
-    })
+      this.setState(
+        response.data
+      )
+    }, setTimeout(()=>{console.log(this.state)},2000) )
     .catch(error => {
       console.log(error)
     })
@@ -33,7 +35,7 @@ export default class App extends React.Component {
         <Text>ex: chicken,bread,juice,jellybeans</Text>
         <FormLabel>Seach</FormLabel>
         <FormInput value={this.state.text} onChangeText={(text) => this.setState({text})}/>
-        <Text style={styles.mainText}>Shake your phone to open the developer menu.</Text>
+        <Text style={styles.mainText}>{this.state.recipes? "Recipe here" : "Waiting to render recipes"}</Text>
         <Button 
           onPress = {() => {this.handleSubmit()}}
           title="Find Recipes" 

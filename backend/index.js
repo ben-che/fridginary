@@ -12,7 +12,6 @@ const recipeSearchUrl = `http://food2fork.com/api/search?key=${secret}&q=`
 
 // Main get route --> returns JSON object of recipe search results
 app.get('/findRecipe', (req, res) => {
-    console.log('get route hit)')
     console.log(req.query.items.split(',').join('&'))
     axios.get(recipeSearchUrl+(req.query.items.split(',').join('&')))
     .then(response => {

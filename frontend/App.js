@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View, FlatList } from 'react-native';
+import { StyleSheet, Text, View, FlatList, Image, Linking, Alert} from 'react-native';
 import { FormLabel, FormInput, FormValidationMessage, Button } from 'react-native-elements';
 import { createStackNavigator } from 'react-navigation';
 const axios = require('axios');
@@ -31,18 +31,28 @@ class HomeScreen extends React.Component {
     // with a real device, use ip address of the device the express server is hosted on
     axios.get(`http://${internalIp}:8080/findRecipe?items=${formatText}`)
     .then(response => {
-      console.log(response)
+      console.log(response.data)
       this.setState(
         response.data
       )
     })
     .then(response => {
       // Nav to results, pass entire state
-      this.props.navigation.navigate('Results', this.state)
+      console.log(this.state)
+      if (this.state.recipes.length === 0) {
+        alert('No results found, check your spelling or try again with less parameters', {text: 'Okay', onPress: () => console.log('Okay Pressed'), style: 'cancel'})
+      }
+      else {
+        this.props.navigation.navigate('Results', this.state)
+      }
     })
     .catch(error => {
       console.log(error)
     })
+  }
+
+  componentDidMount = () => {
+    
   }
 
   render() {
@@ -83,27 +93,46 @@ class ResultsScreen extends React.Component {
 
   componentDidMount = () => {
     console.log('ResultsScreen mounted!')
-    // console.log(this.props);
-    console.log(this.props.navigation.state.params) // state as prop is found here
+    // console.log(this.props.naviggation.state);
+    console.log(this.props) // state as prop is found here
+
+    // Linking:
+    Linking.addEventListener('url', this._handleOpenURL);
+    Linking.getInitialURL().then((url) => {
+      if (url) {
+        console.log('Initial url is: ' + url);
+      }
+    }).catch(err => console.error('An error occurred', err));
   }
+
+  componentWillUnmount() {
+    Linking.removeEventListener('url', this._handleOpenURL);
+  }
+
+  // _handleOpenURL(event) {
+  //   console.log(event.url);
+  //   Linking.openURL(this.props.navigation.state.params.recipes.source_url).catch(err => console.error('An error occurred', err));
+  // }
+
   render() {
-
-
+    
     return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-        {/* <Button
-          title="Go to Details"
-          onPress={() => this.props.navigation.navigate('Home')}
-        /> */}
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }} >
+        
         <FlatList
-          data={this.props.navigation.state.params.recipes}
+          data = {this.props.navigation.state.params.recipes}
           renderItem={({item}) => 
-          <View key={item.recipe_id}>
+          <View key={item.recipe_id} >
+            <Image
+                style={{width: 125, height: 125}}
+                source={{uri: item.image_url}}
+            />
             <Text>Recipe #{item.recipe_id}: {item.title}</Text>
             <Text>Popularity:{item.social_rank}</Text>
           </View>
           }
-        />
+        /> 
+        
       </View>
     );
   }
